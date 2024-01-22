@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:4.4.6
+    container_name: mongodb_container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: flamurroot
+      MONGO_INITDB_ROOT_PASSWORD: test123root
+      MONGO_INITDB_DATABASE: todo
+    ports:
+      - "27017:27017"
+    volumes:
+        - /home/flamur/project/mongodb_data:/data/db
+        - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+
