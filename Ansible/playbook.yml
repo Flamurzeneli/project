@@ -1,0 +1,60 @@
+---
+- name: Set up the server
+  hosts: myserver
+  become: yes
+  tasks:
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: 'dist'
+    
+    - name: Install Docker and Docker Compose
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - docker.io
+          - docker-compose
+
+    - name: Install Node.js 16 and NPM
+      shell: |
+        sudo apt install -y nodejs
+        sudo apt install -y npm
+      args:
+        executable: /bin/bash
+
+    - name: Clone the project repository
+      git:
+        repo: 'git@github.com:Flamurzeneli/project.git'
+        dest: /home/flamur/project
+        clone: yes
+        update: yes
+      become: no
+      become_user: flamur
+
+    - name: Add user to Docker group
+      user:
+        name: flamur
+        group: docker
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+
+    - name: Copy Index.html to Apache directory
+      copy:
+        src: /home/flamur/project/Index.html
+        dest: /var/www/html/index.html
+
+    - name: Restart Apache2
+      service:
+        name: apache2
+        state: restarted
+
+    - name: Configure SSH
+      copy:
+        src: /home/flamur/project/config
+        dest: /home/flamur/.ssh/config
+        owner: flamur
+        group: flamur
+        mode: '0644'
